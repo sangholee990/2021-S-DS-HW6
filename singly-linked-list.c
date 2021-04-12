@@ -134,11 +134,13 @@ int insertFirst(headNode* h, int key) {
 	return 0;
 }
 
-
+/* 리스트를 검색하여, 입력받은 key보다 큰값이 나오는 노드 바로 앞에 삽입 */
 int insertNode(headNode* h, int key) {
-        listNode* node = (listNode*)malloc(sizeof(listNode)); // 새로 넣을 노드 동적할당으로 생성  
-        listNode* head = h->first; // 제일 첫번째 노드를 가리키는 헤드 노드
+	
+    listNode* node = (listNode*)malloc(sizeof(listNode)); // 새로 넣을 노드 동적할당으로 생성  
+    listNode* head = h->first; //제일 맨앞 노드를 가리키는 곳을 head가 가리키게 
 	listNode* prenode=NULL; // 이전 노드 위치 기억 포인터 변수
+	node->link=NULL; //node 가 가리키는곳 초기화 
 	int cnt=1; //반복문 체크 변수 
 	
 	node->key = key; // 입력된 키값을 생성한 노드에 넣는다
@@ -147,19 +149,19 @@ int insertNode(headNode* h, int key) {
 	{
 		 h->first=node; // 입력받은 노드를 맨앞  노드로 삽입
 		 node->link=NULL; // 노드 꼬리 초기화 
-        }
+    }
 	
 	else //노드가 비어있지 않으면 
 	{
 		if(head->link == NULL)  //노드가 유일할때
 		{ 
-			if(key < head->key) //헤드의 키값이 새로들어온 키값보다 크면
+			if(key < head->key) //현재노드의 키값이 새로들어온 키값보다 크면
 			{
-				node->link=head; //헤드 노드 앞에 새로운 노드를 연결
+				node->link=head; //현재  노드 앞에 새로운 노드를 연결
 				h->first=node; // 맨앞을 새로운노드로 초기화 
 			} 
 			
-			else // 입력받은 키값이 헤드노드의 키값보다 클경우 
+			else // 입력받은 키값이 현재노드의 키값보다 클경우 
 			{
 				head->link=node; //헤드 링크 뒤에 새로운 노드 연결 
 			}
@@ -169,7 +171,7 @@ int insertNode(headNode* h, int key) {
 	
 	while(head != NULL){ //노드가 여러개일때 
 	   
-	        if(head->key > key) //헤드가 가리키는 키값이 입력받는 키값보다 크면 
+	        if(head->key > key) //현재노드가 가리키는 키값이 입력받는 키값보다 크면 
 			{
 				  node->link=head; // 새로운 노드를 헤드앞에 연결 
 				  
@@ -189,7 +191,7 @@ int insertNode(headNode* h, int key) {
 			head=head->link; // 다음노드 가리키도록 
 			
 			cnt ++;
-	} //헤드노드가 가리키는게 없을때까지 반복	 
+	} //현재노드가 가리키는게 없을때까지 반복	 
 	
 	if(head==NULL) // 맨뒤 삽입경우 
 	{
@@ -200,37 +202,146 @@ int insertNode(headNode* h, int key) {
     }
     
     return 0;
-}
+} 
+	
 
+/**
+ * list에 key에 대한 노드하나를 추가
+ */
 int insertLast(headNode* h, int key) {
-
-	return 0;
+    
+    listNode* node = (listNode*)malloc(sizeof(listNode)); // 뒤에 붙일 노드 동적 할당으로 생성
+    listNode* head = h->first; //제일 맨앞 노드를 가리키는 곳을 head가 가리키게 
+    node->link = NULL;
+	node->key= key; //입력받은 키 넣어주기 
+	
+	if(h->first==NULL) //노드가 비었으면 
+	{
+		h->first=node; //제일 앞노드를 새로운 노드로 초기화 
+	}
+	
+	while(head->link != NULL) // 현재노드가 빈곳을 가리키지 않으면 계속 반복 
+	{
+	      head=head->link;// 현재 노드를 한칸씩 다음 노드 가리키게 이동 
+	   
+	}
+	
+	head->link=node; //마지막 노드 뒤에 node노드 연결
+    
+    return 0;
 }
 
-
-
+//맨앞 노드 제거 함수 
 int deleteFirst(headNode* h) {
-
-
-	return 0;
+    
+    if(h->first ==NULL){
+			printf("더 이상 삭제할 노드가 없습니다\n");
+			return 1;
+	    }
+		else{
+		    listNode* head = h->first; //제일 맨앞 노드를 가리키는 곳을 head가 가리키게  
+		    h->first=head->link; //노드 맨앞을 가리키는 포인터를 현재 노드의 다음노드로 포인팅
+			free(head); // 제일 첫번째 노드였던거 반납 
+       }
+	    
+	return 1;
+       
 }
-
+/**
+ * list에서 key에 대한 노드 삭제
+ */
 
 int deleteNode(headNode* h, int key) {
-
+	
+	listNode* head = h->first; //맨 앞을 가리키는 곳을 head가 가리키게 
+	listNode* prenode = NULL; // 이전 노드 포인터 변수 NULL로 초기화 
+	
+	if(h->first ==NULL) //리스트에 노드가 없으면
+	{ 
+	    printf("더 이상 삭제할 노드가 없습니다.");
+	    return 1;
+	}
+	
+	while(head != NULL) //현재노드가 가리키는 곳이 비지않을때 까지 
+	{
+	    if(head->key == key){ //입력키가 현재키와 같으면 
+	    	 if(head==h->first){ //맨 앞 노드가 현재 노드와 같으면 
+	    	 	     h->first=head->link; //현재노드가 맨앞노드 가리키게 
+			 } 
+			 else //같지 않으면 
+			 {
+			 	prenode->link = head->link;// 현재노드가 가리키던곳을 이전노드가 가리키는 곳으로 설정 
+			 }
+			 free(head); // 노드 반납
+			 return 1; 
+		}
+		prenode = head; // head노드를 이전노드에 저장
+		head= head->link;// 헤드노드  다음 노드로 이동 
+		
+	}
+	
+    
 	return 0;
-
 }
 
 
 int deleteLast(headNode* h) {
-
+    
+    listNode* head = h->first; //이동하는 현재 노드를 맨앞으로 초기화 
+    listNode* prenode = NULL; //이전 노드를 가리키는 포인터
+    
+    if(h->first==NULL)//리스트에 노드가 없으면
+	{
+		printf("더 이상 삭제할 노드가 없습니다");
+		return 1; 
+	 } 
+	
+    else// 노드가 한개이상 있을때
+	{
+		if((lead->link==NULL)&&(prenode==NULL))// 노드가 유일할때
+		{
+			h->first=NULL; //맨앞 포인터 널 초기화 
+			free(head);// 기존 노드 반납
+		    return 1; 
+		 }
+		 
+		 while(head->link != NULL)//노드 2개 이상일 경우
+		 {
+		 	prenode=head; //이전 노드를 현재 노드 위치로;
+			head= head->link; //현재 노드 다음노드로 한칸 
+		  } 
+		  
+		  prenode->link =NULL; // 제일 꼬리 초기화
+		  free(head); // 맨 마지막 노드 반납 
+	 } 
+	 
+    
 	return 0;
 }
 
 
 int invertList(headNode* h) {
-
+	
+    listNode* head = h->first; //이동하는 현재 노드를 맨앞으로 초기화 
+	listNode* tail;   
+	listNode* mid=NULL;
+	
+	if(h->first ==NULL) // 노드가 없으면 
+	{
+	     printf("리스트에 남은 노드가 없습니다\n");
+	     return 1;
+	}
+	
+	while(head) //이동하는 현재노드가 NULL 까지 반복 
+	{
+		tail=mid; //tail노드를 mid 로
+		mid=head; // mid노드를 head로 
+		head=head->link; // head를 다음 노드위치로 한칸
+		mid->link = tail;// mid의 포인터를 역방향으로 
+	}
+	
+	h->first=mid; // 역순이 되므로 mid가 맨앞 노드 
+	
 	return 0;
 }
 
